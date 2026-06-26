@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Scalar.AspNetCore;
 using ProbabilityCalculator.Api.Endpoints;
 using ProbabilityCalculator.Api.Services;
 
@@ -13,8 +14,15 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 });
 
 builder.Services.AddSingleton<IProbabilityCalculator, ProbabilityCalculatorService>();
+builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    app.MapScalarApiReference(); // /scalar
+}
 
 app.MapGet("/", () => Results.Ok(new
 {
