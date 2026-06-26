@@ -24,11 +24,7 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference(); // /scalar
 }
 
-app.MapGet("/", () => Results.Ok(new
-{
-    name = "Probability Calculator API",
-    endpoint = "/api/calculations"
-}));
+app.MapGet("/", () => Results.Redirect("/scalar"));
 
 app.MapCalculationEndpoints();
 
