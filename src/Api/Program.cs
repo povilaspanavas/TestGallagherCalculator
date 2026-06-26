@@ -6,6 +6,8 @@ using ProbabilityCalculator.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddServiceDefaults();
+
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.Converters.Add(
@@ -16,6 +18,8 @@ builder.Services.AddScoped<IProbabilityCalculator, ProbabilityCalculatorService>
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+app.MapDefaultEndpoints();
 
 if (app.Environment.IsDevelopment())
 {
@@ -29,4 +33,4 @@ app.MapCalculationEndpoints();
 
 app.Run();
 
-public partial class Program;
+public abstract partial class Program;

@@ -1,0 +1,20 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.1.0">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <UserSecretsId>013a006d-842a-4f74-9f33-6e989704cfd2</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\src\Api\ProbabilityCalculator.Api.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Aspire.Hosting.AppHost" Version="13.4.6" />
+      <PackageReference Include="Aspire.Hosting.JavaScript" Version="13.4.6" />
+    </ItemGroup>
+
+</Project>
