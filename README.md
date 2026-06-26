@@ -1,6 +1,6 @@
 # Probability Calculator
 
-A small probability calculator built with a .NET 8 Minimal API and a React/TypeScript frontend.
+A small probability calculator built with a .NET 10 Minimal API and a React/TypeScript frontend.
 
 The calculator supports:
 
@@ -21,7 +21,7 @@ tests/ProbabilityCalculator.Api.Tests/ Backend unit tests
 
 Requirements:
 
--   .NET 8 SDK or newer
+-   .NET 10 SDK or newer
 -   Node.js and npm
 
 Start the API:
