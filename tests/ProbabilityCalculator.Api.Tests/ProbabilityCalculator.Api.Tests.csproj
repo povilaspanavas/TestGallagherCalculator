@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\ProbabilityCalculator.Api\ProbabilityCalculator.Api.csproj" />
+    <ProjectReference Include="..\..\src\Api\ProbabilityCalculator.Api.csproj" />
   </ItemGroup>
 
 </Project>

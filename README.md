@@ -12,9 +12,9 @@ The calculator supports:
 ## Project structure
 
 ```text
-src/ProbabilityCalculator.Api/        .NET Minimal API
+src/Api/                              .NET Minimal API
+src/ClientApp/                        React and TypeScript application
 tests/ProbabilityCalculator.Api.Tests/ Backend unit tests
-frontend/                             React and TypeScript application
 ```
 
 ## Run locally
@@ -27,7 +27,7 @@ Requirements:
 Start the API:
 
 ```powershell
-dotnet run --project src/ProbabilityCalculator.Api
+dotnet run --project src/Api
 ```
 
 The API listens on `http://localhost:5000`.
@@ -35,7 +35,7 @@ The API listens on `http://localhost:5000`.
 In a second terminal, start the frontend:
 
 ```powershell
-cd frontend
+cd src\ClientApp
 npm install
 npm run dev
 ```
@@ -47,7 +47,7 @@ Open the URL printed by Vite, normally `http://localhost:5173`. The Vite develop
 ```powershell
 dotnet test
 
-cd frontend
+cd src\ClientApp
 npm test
 npm run lint
 npm run build
