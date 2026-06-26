@@ -8,12 +8,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
-    options.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
     options.SerializerOptions.Converters.Add(
         new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
 });
 
-builder.Services.AddSingleton<IProbabilityCalculator, ProbabilityCalculatorService>();
+builder.Services.AddScoped<IProbabilityCalculator, ProbabilityCalculatorService>();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
