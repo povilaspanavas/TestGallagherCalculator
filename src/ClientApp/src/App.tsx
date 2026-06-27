@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react'
-import type { FormEvent } from 'react'
 import { ApiError, calculateProbability } from './api/calculations'
 import type {
   CalculationOperation,
@@ -42,6 +41,24 @@ function formatPercentage(value: number) {
   return new Intl.NumberFormat('en-GB', {
     maximumFractionDigits: 4,
   }).format(value * 100)
+}
+
+function getFormString(formData: FormData, field: string) {
+  const value = formData.get(field)
+
+  return typeof value === 'string' ? value : ''
+}
+
+function isCalculationOperation(
+  value: FormDataEntryValue | null,
+): value is CalculationOperation {
+  return typeof value === 'string' && value in operations
+}
+
+function getFormOperation(formData: FormData): CalculationOperation | undefined {
+  const value = formData.get('operation')
+
+  return isCalculationOperation(value) ? value : undefined
 }
 
 function App() {
@@ -91,14 +108,21 @@ function App() {
     setResult(null)
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+  async function submitCalculation(formData: FormData) {
     setSubmitError('')
 
-    const validation = validateCalculationForm(probabilityA, probabilityB)
-    setErrors(validation.errors)
+    const submittedOperation = getFormOperation(formData)
+    const validation = validateCalculationForm(
+      getFormString(formData, 'probabilityA'),
+      getFormString(formData, 'probabilityB'),
+    )
+    const nextErrors: FormErrors = {
+      ...validation.errors,
+      operation: submittedOperation ? undefined : 'Choose a calculation.',
+    }
+    setErrors(nextErrors)
 
-    if (!validation.values) {
+    if (!validation.values || !submittedOperation) {
       setResult(null)
       return
     }
@@ -108,7 +132,7 @@ function App() {
     try {
       const calculation = await calculateProbability({
         ...validation.values,
-        operation,
+        operation: submittedOperation,
       })
       setResult(calculation)
     } catch (error) {
@@ -153,7 +177,7 @@ function App() {
         </section>
 
         <section className="calculator-card" aria-label="Probability calculator">
-          <form className="calculator-form" onSubmit={handleSubmit} noValidate>
+          <form className="calculator-form" action={submitCalculation} noValidate>
             <div className="form-heading">
               <span className="step-number">01</span>
               <div>
