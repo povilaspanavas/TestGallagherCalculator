@@ -1,6 +1,7 @@
 using ProbabilityCalculator.Api.Contracts;
 using ProbabilityCalculator.Api.Services;
 using ProbabilityCalculator.Api.Validation;
+using Microsoft.Extensions.Logging;
 
 namespace ProbabilityCalculator.Api.Endpoints;
 
@@ -11,7 +12,7 @@ public static class CalculationEndpoints
     {
         endpoints.MapPost(
                 "/api/calculations",
-                (CalculationRequest request, IProbabilityCalculator calculator) =>
+                (CalculationRequest request, IProbabilityCalculator calculator, ILogger<MapCalculationEndpointsMarker> logger) =>
                 {
                     var errors = CalculationRequestValidator.Validate(request);
 
@@ -28,6 +29,15 @@ public static class CalculationEndpoints
                         probabilityB,
                         operation);
 
+                    logger.LogInformation(
+                        "Calculation completed at {CalculatedAt}: operation={Operation}, probabilityA={ProbabilityA}, " +
+                        "probabilityB={ProbabilityB}, result={Result}",
+                        DateTimeOffset.UtcNow,
+                        operation,
+                        probabilityA,
+                        probabilityB,
+                        result);
+
                     return Results.Ok(new CalculationResponse(
                         probabilityA,
                         probabilityB,
@@ -41,3 +51,5 @@ public static class CalculationEndpoints
         return endpoints;
     }
 }
+
+internal sealed class MapCalculationEndpointsMarker { }
