@@ -1,5 +1,4 @@
 using ProbabilityCalculator.Api.Contracts;
-using ProbabilityCalculator.Api.Models;
 using ProbabilityCalculator.Api.Services;
 using ProbabilityCalculator.Api.Validation;
 using Microsoft.Extensions.Logging;
@@ -10,37 +9,28 @@ public static class CalculationEndpoints
 {
     public const string OperationsOutputCachePolicy = "CalculationOperations";
 
-    private static readonly CalculationOperationResponse[] OperationResponses =
-    [
-        new(
-            CalculationOperation.CombinedWith,
-            "Combined with",
-            "The probability that both events occur.",
-            "P(A) × P(B)",
-            1),
-        new(
-            CalculationOperation.Either,
-            "Either",
-            "The probability that at least one event occurs.",
-            "P(A) + P(B) − P(A)P(B)",
-            2)
-    ];
-
     public static IEndpointRouteBuilder MapCalculationEndpoints(
         this IEndpointRouteBuilder endpoints)
     {
         endpoints.MapGet(
                 "/api/calculations/operations",
-                () => Results.Ok(OperationResponses))
+                (ICalculationOperationCatalog operations) =>
+                    Results.Ok(operations.Operations.Select(operation => operation.ToResponse())))
             .WithName("GetCalculationOperations")
             .Produces<IReadOnlyList<CalculationOperationResponse>>()
             .CacheOutput(OperationsOutputCachePolicy);
 
         endpoints.MapPost(
                 "/api/calculations",
-                (CalculationRequest request, IProbabilityCalculator calculator, ILogger<MapCalculationEndpointsMarker> logger) =>
+                (
+                    CalculationRequest request,
+                    ICalculationOperationCatalog operations,
+                    IProbabilityCalculator calculator,
+                    ILogger<MapCalculationEndpointsMarker> logger) =>
                 {
-                    var errors = CalculationRequestValidator.Validate(request);
+                    var errors = CalculationRequestValidator.Validate(
+                        request,
+                        operations);
 
                     if (errors.Count > 0)
                     {

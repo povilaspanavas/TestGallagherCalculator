@@ -1,11 +1,14 @@
 using ProbabilityCalculator.Api.Contracts;
 using ProbabilityCalculator.Api.Models;
+using ProbabilityCalculator.Api.Services;
 using ProbabilityCalculator.Api.Validation;
 
 namespace ProbabilityCalculator.Api.Tests;
 
 public sealed class CalculationRequestValidatorTests
 {
+    private readonly CalculationOperationCatalog _operations = new();
+
     [Fact]
     public void Validate_AcceptsBoundaryProbabilities()
     {
@@ -14,7 +17,7 @@ public sealed class CalculationRequestValidatorTests
             1,
             CalculationOperation.CombinedWith);
 
-        var errors = CalculationRequestValidator.Validate(request);
+        var errors = CalculationRequestValidator.Validate(request, _operations);
 
         Assert.Empty(errors);
     }
@@ -24,7 +27,7 @@ public sealed class CalculationRequestValidatorTests
     {
         var request = new CalculationRequest(null, null, null);
 
-        var errors = CalculationRequestValidator.Validate(request);
+        var errors = CalculationRequestValidator.Validate(request, _operations);
 
         Assert.Equal(3, errors.Count);
         Assert.Contains("probabilityA", errors);
@@ -47,7 +50,7 @@ public sealed class CalculationRequestValidatorTests
             probabilityB,
             CalculationOperation.Either);
 
-        var errors = CalculationRequestValidator.Validate(request);
+        var errors = CalculationRequestValidator.Validate(request, _operations);
 
         Assert.Contains(expectedField, errors);
     }

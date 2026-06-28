@@ -4,6 +4,13 @@ namespace ProbabilityCalculator.Api.Services;
 
 public sealed class ProbabilityCalculatorService : IProbabilityCalculator
 {
+    private readonly ICalculationOperationCatalog _operations;
+
+    public ProbabilityCalculatorService(ICalculationOperationCatalog operations)
+    {
+        _operations = operations;
+    }
+
     public decimal Calculate(
         decimal probabilityA,
         decimal probabilityB,
@@ -12,16 +19,8 @@ public sealed class ProbabilityCalculatorService : IProbabilityCalculator
         EnsureValidProbability(probabilityA, nameof(probabilityA));
         EnsureValidProbability(probabilityB, nameof(probabilityB));
 
-        return operation switch
-        {
-            CalculationOperation.CombinedWith => probabilityA * probabilityB,
-            CalculationOperation.Either =>
-                probabilityA + probabilityB - (probabilityA * probabilityB),
-            _ => throw new ArgumentOutOfRangeException(
-                nameof(operation),
-                operation,
-                "Unsupported calculation operation.")
-        };
+        return _operations.GetRequiredOperation(operation)
+            .Calculate(probabilityA, probabilityB);
     }
 
     private static void EnsureValidProbability(decimal value, string parameterName)

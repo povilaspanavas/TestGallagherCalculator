@@ -1,11 +1,14 @@
 using ProbabilityCalculator.Api.Contracts;
 using ProbabilityCalculator.Api.Models;
+using ProbabilityCalculator.Api.Services;
 
 namespace ProbabilityCalculator.Api.Validation;
 
 public static class CalculationRequestValidator
 {
-    public static Dictionary<string, string[]> Validate(CalculationRequest request)
+    public static Dictionary<string, string[]> Validate(
+        CalculationRequest request,
+        ICalculationOperationCatalog operations)
     {
         var errors = new Dictionary<string, string[]>();
 
@@ -25,7 +28,7 @@ public static class CalculationRequestValidator
         {
             errors["operation"] = ["Select a calculation."];
         }
-        else if (!Enum.IsDefined(typeof(CalculationOperation), request.Operation.Value))
+        else if (!operations.IsSupported(request.Operation.Value))
         {
             errors["operation"] = ["The selected calculation is not supported."];
         }

@@ -16,6 +16,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
             allowIntegerValues: false));
 });
 
+builder.Services.AddSingleton<ICalculationOperationCatalog, CalculationOperationCatalog>();
 builder.Services.AddScoped<IProbabilityCalculator, ProbabilityCalculatorService>();
 builder.Services.AddOutputCache(options =>
 {

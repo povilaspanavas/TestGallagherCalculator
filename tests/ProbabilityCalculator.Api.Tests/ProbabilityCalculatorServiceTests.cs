@@ -5,7 +5,8 @@ namespace ProbabilityCalculator.Api.Tests;
 
 public sealed class ProbabilityCalculatorServiceTests
 {
-    private readonly ProbabilityCalculatorService _calculator = new();
+    private readonly ProbabilityCalculatorService _calculator = new(
+        new CalculationOperationCatalog());
 
     [Theory]
     [InlineData(0.5, 0.5, 0.25)]
