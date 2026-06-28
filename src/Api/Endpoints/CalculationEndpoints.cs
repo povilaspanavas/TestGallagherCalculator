@@ -7,7 +7,7 @@ namespace ProbabilityCalculator.Api.Endpoints;
 
 public static class CalculationEndpoints
 {
-    public const string OperationsOutputCachePolicy = "CalculationOperations";
+    public const string OperationsCachePolicy = "CalculationOperations";
 
     public static IEndpointRouteBuilder MapCalculationEndpoints(
         this IEndpointRouteBuilder endpoints)
@@ -17,7 +17,7 @@ public static class CalculationEndpoints
                 GetCalculationOperations)
             .WithName("GetCalculationOperations")
             .Produces<IReadOnlyList<CalculationOperationResponse>>()
-            .CacheOutput(OperationsOutputCachePolicy);
+            .CacheOutput(OperationsCachePolicy);
 
         endpoints.MapPost(
                 "/api/calculations",

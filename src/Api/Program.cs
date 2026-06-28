@@ -21,7 +21,7 @@ builder.Services.AddScoped<IProbabilityCalculator, ProbabilityCalculatorService>
 builder.Services.AddOutputCache(options =>
 {
     options.AddPolicy(
-        CalculationEndpoints.OperationsOutputCachePolicy,
+        CalculationEndpoints.OperationsCachePolicy,
         policy => policy.Expire(TimeSpan.FromMinutes(30)));
 });
 builder.Services.AddOpenApi();
