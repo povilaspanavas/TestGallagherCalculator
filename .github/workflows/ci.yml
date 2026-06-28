@@ -150,8 +150,8 @@ jobs:
         if: steps.dotnet-tests.outcome != 'success'
         run: exit 1
 
-  client:
-    name: Client
+  client-app:
+    name: ClientApp
     runs-on: ubuntu-latest
 
     defaults:
