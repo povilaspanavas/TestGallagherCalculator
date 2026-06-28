@@ -18,6 +18,38 @@ public sealed class CalculationEndpointTests : IClassFixture<ApiTestApplicationF
     }
 
     [Fact]
+    public async Task GetCalculationOperations_ReturnsSupportedOperations()
+    {
+        using var response = await _client.GetAsync(
+            "/api/calculations/operations");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var operations = await response.Content
+            .ReadFromJsonAsync<CalculationOperationResponse[]>(JsonOptions);
+
+        Assert.NotNull(operations);
+        Assert.Collection(
+            operations,
+            operation => Assert.Equal(
+                new CalculationOperationResponse(
+                    CalculationOperation.CombinedWith,
+                    "Combined with",
+                    "The probability that both events occur.",
+                    "P(A) × P(B)",
+                    1),
+                operation),
+            operation => Assert.Equal(
+                new CalculationOperationResponse(
+                    CalculationOperation.Either,
+                    "Either",
+                    "The probability that at least one event occurs.",
+                    "P(A) + P(B) − P(A)P(B)",
+                    2),
+                operation));
+    }
+
+    [Fact]
     public async Task PostCalculation_WithValidRequest_ReturnsCalculationResponse()
     {
         var request = new CalculationRequest(

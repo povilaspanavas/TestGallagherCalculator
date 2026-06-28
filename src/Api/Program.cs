@@ -15,9 +15,17 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 });
 
 builder.Services.AddScoped<IProbabilityCalculator, ProbabilityCalculatorService>();
+builder.Services.AddOutputCache(options =>
+{
+    options.AddPolicy(
+        CalculationEndpoints.OperationsOutputCachePolicy,
+        policy => policy.Expire(TimeSpan.FromMinutes(30)));
+});
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+app.UseOutputCache();
 
 app.MapDefaultEndpoints();
 
