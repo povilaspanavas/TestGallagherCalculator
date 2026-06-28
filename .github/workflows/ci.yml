@@ -32,7 +32,100 @@ jobs:
         run: dotnet build ProbabilityCalculator.sln --configuration Release --no-restore
 
       - name: Test
-        run: dotnet test ProbabilityCalculator.sln --configuration Release --no-build
+        id: dotnet-tests
+        continue-on-error: true
+        run: >-
+          dotnet test ProbabilityCalculator.sln
+          --configuration Release
+          --no-build
+          --logger "trx;LogFilePrefix=test-results"
+          --results-directory TestResults
+          --collect:"XPlat Code Coverage"
+
+      - name: Upload .NET test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-test-results
+          path: TestResults/**/*.trx
+          if-no-files-found: warn
+
+      - name: Upload .NET coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-coverage
+          path: TestResults/**/coverage.cobertura.xml
+          if-no-files-found: warn
+
+      - name: Summarize .NET test results
+        if: always()
+        shell: pwsh
+        run: |
+          $trxFiles = Get-ChildItem -Path "TestResults" -Recurse -Filter "*.trx" -ErrorAction SilentlyContinue
+          if (-not $trxFiles) {
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "## .NET summary"
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value ""
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "No `.trx` test results were produced."
+            exit 0
+          }
+
+          $namespace = @{ t = "http://microsoft.com/schemas/VisualStudio/TeamTest/2010" }
+          $total = 0
+          $passed = 0
+          $failed = 0
+          $skipped = 0
+
+          foreach ($trxFile in $trxFiles) {
+            [xml]$trx = Get-Content -Raw $trxFile.FullName
+            $counters = Select-Xml -Xml $trx -Namespace $namespace -XPath "//t:ResultSummary/t:Counters" |
+              Select-Object -ExpandProperty Node -First 1
+
+            if ($null -ne $counters) {
+              $total += [int]$counters.total
+              $passed += [int]$counters.passed
+              $failed += ([int]$counters.failed + [int]$counters.error + [int]$counters.timeout + [int]$counters.aborted)
+              $skipped += ([int]$counters.notExecuted + [int]$counters.inconclusive + [int]$counters.notRunnable)
+            }
+          }
+
+          $coverageFiles = Get-ChildItem -Path "TestResults" -Recurse -Filter "coverage.cobertura.xml" -ErrorAction SilentlyContinue
+          $linesCovered = 0
+          $linesValid = 0
+          $branchesCovered = 0
+          $branchesValid = 0
+
+          foreach ($coverageFile in $coverageFiles) {
+            [xml]$coverage = Get-Content -Raw $coverageFile.FullName
+            $root = $coverage.coverage
+            $linesCovered += [int]$root.'lines-covered'
+            $linesValid += [int]$root.'lines-valid'
+            $branchesCovered += [int]$root.'branches-covered'
+            $branchesValid += [int]$root.'branches-valid'
+          }
+
+          $lineCoverage = if ($linesValid -gt 0) { [math]::Round(($linesCovered / $linesValid) * 100, 2) } else { $null }
+          $branchCoverage = if ($branchesValid -gt 0) { [math]::Round(($branchesCovered / $branchesValid) * 100, 2) } else { $null }
+
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "## .NET summary"
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value ""
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "| Metric | Value |"
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "| --- | ---: |"
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "| Test results | $passed passed / $total total |"
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "| Failed | $failed |"
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "| Skipped | $skipped |"
+
+          if ($null -ne $lineCoverage) {
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "| Line coverage | $lineCoverage% |"
+          }
+
+          if ($null -ne $branchCoverage) {
+            Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "| Branch coverage | $branchCoverage% |"
+          }
+
+      - name: Fail job if .NET tests failed
+        if: steps.dotnet-tests.outcome != 'success'
+        run: exit 1
 
   client:
     name: Client
