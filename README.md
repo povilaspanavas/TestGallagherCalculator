@@ -14,7 +14,9 @@ The calculator supports:
 ```text
 src/Api/                              .NET Minimal API
 src/ClientApp/                        React and TypeScript application
+src/ClientApp/src/                    React source and colocated Vitest tests
 tests/ProbabilityCalculator.Api.Tests/ Backend unit tests
+tests/ProbabilityCalculator.Api.IntegrationTests/ Backend integration tests
 ```
 
 ## Run locally
