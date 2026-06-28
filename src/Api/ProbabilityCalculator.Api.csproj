@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ProbabilityCalculator.ServiceDefaults\ProbabilityCalculator.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\ProbabilityCalculator.ServiceDefaults\ProbabilityCalculator.ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>

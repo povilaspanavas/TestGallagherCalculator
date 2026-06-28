@@ -4,7 +4,7 @@ var api = builder
     .AddProject<Projects.ProbabilityCalculator_Api>("ProbabilityCalculatorApi")
     .WithHttpsEndpoint(port: 5001);
 
-builder.AddViteApp("ClientApp", "../src/ClientApp")
+builder.AddViteApp("ClientApp", "../ClientApp")
     .WithHttpEndpoint(port: 5173, env: "PORT")
     .WithExternalHttpEndpoints()
     .WithReference(api);

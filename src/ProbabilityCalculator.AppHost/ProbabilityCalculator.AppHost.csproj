@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\src\Api\ProbabilityCalculator.Api.csproj" />
+      <ProjectReference Include="..\Api\ProbabilityCalculator.Api.csproj" />
     </ItemGroup>
 
     <ItemGroup>
