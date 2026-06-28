@@ -33,9 +33,18 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
     app.MapScalarApiReference(); // /scalar
+    app.MapGet("/", () => Results.Redirect("/scalar"));
 }
-
-app.MapGet("/", () => Results.Redirect("/scalar"));
+else
+{
+    app.MapGet(
+        "/",
+        () => Results.Ok(new
+        {
+            name = "Probability Calculator API",
+            status = "OK"
+        }));
+}
 
 app.MapCalculationEndpoints();
 
