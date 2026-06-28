@@ -55,6 +55,21 @@ npm run build
 
 ## API
 
+`GET /health`
+
+Readiness endpoint intended for load balancers, deployment checks, and uptime
+monitoring.
+
+`GET /alive`
+
+Liveness endpoint intended for process-level checks.
+
+These endpoints are available in all environments to support production
+monitoring and orchestration. In a real deployment, they should avoid exposing
+detailed dependency or infrastructure information and should normally be
+restricted through platform or network controls, for example private Kubernetes
+probes, internal load balancer access, or API gateway/reverse-proxy rules.
+
 `POST /api/calculations`
 
 Example request:
