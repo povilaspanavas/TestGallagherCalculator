@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { validateCalculationForm } from './validation'
+import { validateCalculationForm } from './calculationFormValidation'
 
 describe('validateCalculationForm', () => {
   it('accepts values at both probability boundaries', () => {

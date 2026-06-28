@@ -1,4 +1,4 @@
-import type { FormErrors } from './types'
+import type { FormErrors } from '../types'
 
 interface ValidationResult {
   errors: FormErrors
