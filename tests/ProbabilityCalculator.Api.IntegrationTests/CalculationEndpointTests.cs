@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Http;
@@ -103,6 +104,41 @@ public sealed class CalculationEndpointTests : IClassFixture<ApiTestApplicationF
         Assert.Contains(
             "Probability A must be between 0 and 1.",
             probabilityAErrors);
+    }
+
+    [Fact]
+    public async Task PostCalculation_WithUnsupportedOperationString_ReturnsBadRequest()
+    {
+        var request = new
+        {
+            probabilityA = 0.5m,
+            probabilityB = 0.25m,
+            operation = "exclusiveOr"
+        };
+
+        using var response = await _client.PostAsJsonAsync(
+            "/api/calculations",
+            request);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("""{ "probabilityA": 0.5, "probabilityB": """)]
+    public async Task PostCalculation_WithMalformedBody_ReturnsBadRequest(
+        string body)
+    {
+        using var content = new StringContent(
+            body,
+            Encoding.UTF8,
+            "application/json");
+
+        using var response = await _client.PostAsync(
+            "/api/calculations",
+            content);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
