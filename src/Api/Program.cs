@@ -11,7 +11,9 @@ builder.AddServiceDefaults();
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.Converters.Add(
-        new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+        new JsonStringEnumConverter(
+            JsonNamingPolicy.CamelCase,
+            allowIntegerValues: false));
 });
 
 builder.Services.AddScoped<IProbabilityCalculator, ProbabilityCalculatorService>();
