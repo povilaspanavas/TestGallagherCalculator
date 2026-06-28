@@ -38,6 +38,7 @@ jobs:
           dotnet test ProbabilityCalculator.sln
           --configuration Release
           --no-build
+          --settings tests/coverlet.runsettings
           --logger "trx;LogFilePrefix=test-results"
           --results-directory TestResults
           --collect:"XPlat Code Coverage"
@@ -55,7 +56,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dotnet-coverage
-          path: TestResults/**/coverage.cobertura.xml
+          path: TestResults/*/coverage.cobertura.xml
           if-no-files-found: warn
 
       - name: Summarize .NET test results
@@ -89,20 +90,48 @@ jobs:
             }
           }
 
-          $coverageFiles = Get-ChildItem -Path "TestResults" -Recurse -Filter "coverage.cobertura.xml" -ErrorAction SilentlyContinue
-          $linesCovered = 0
-          $linesValid = 0
-          $branchesCovered = 0
-          $branchesValid = 0
+          $coverageFiles = Get-ChildItem -Path "TestResults" -Filter "coverage.cobertura.xml" -Recurse -ErrorAction SilentlyContinue |
+            Where-Object { $_.Directory.Name -match '^[0-9a-fA-F-]{36}$' }
+          $lineCoverageByKey = @{}
+          $branchCoverageByKey = @{}
+          $branchTotalByKey = @{}
 
           foreach ($coverageFile in $coverageFiles) {
             [xml]$coverage = Get-Content -Raw $coverageFile.FullName
-            $root = $coverage.coverage
-            $linesCovered += [int]$root.'lines-covered'
-            $linesValid += [int]$root.'lines-valid'
-            $branchesCovered += [int]$root.'branches-covered'
-            $branchesValid += [int]$root.'branches-valid'
+            foreach ($class in $coverage.coverage.packages.package.classes.class) {
+              $file = [string]$class.filename
+
+              foreach ($line in @($class.lines.line)) {
+                $key = "$file`:$($line.number)"
+
+                if (-not $lineCoverageByKey.ContainsKey($key)) {
+                  $lineCoverageByKey[$key] = $false
+                }
+
+                if ([int]$line.hits -gt 0) {
+                  $lineCoverageByKey[$key] = $true
+                }
+
+                if ([string]$line.branch -eq "True") {
+                  $conditionCoverage = [string]$line.'condition-coverage'
+
+                  if ($conditionCoverage -match '\((\d+)/(\d+)\)') {
+                    if (-not $branchCoverageByKey.ContainsKey($key)) {
+                      $branchCoverageByKey[$key] = 0
+                      $branchTotalByKey[$key] = [int]$Matches[2]
+                    }
+
+                    $branchCoverageByKey[$key] = [math]::Max($branchCoverageByKey[$key], [int]$Matches[1])
+                  }
+                }
+              }
+            }
           }
+
+          $linesCovered = @($lineCoverageByKey.Values | Where-Object { $_ }).Count
+          $linesValid = $lineCoverageByKey.Count
+          $branchesCovered = ($branchCoverageByKey.Values | Measure-Object -Sum).Sum
+          $branchesValid = ($branchTotalByKey.Values | Measure-Object -Sum).Sum
 
           $lineCoverage = if ($linesValid -gt 0) { [math]::Round(($linesCovered / $linesValid) * 100, 2) } else { $null }
           $branchCoverage = if ($branchesValid -gt 0) { [math]::Round(($branchesCovered / $branchesValid) * 100, 2) } else { $null }
