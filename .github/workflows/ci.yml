@@ -135,12 +135,13 @@ jobs:
 
           $lineCoverage = if ($linesValid -gt 0) { [math]::Round(($linesCovered / $linesValid) * 100, 2) } else { $null }
           $branchCoverage = if ($branchesValid -gt 0) { [math]::Round(($branchesCovered / $branchesValid) * 100, 2) } else { $null }
+          $testStatusIcon = if ($failed -eq 0 -and $total -gt 0) { "✅" } else { "❌" }
 
           Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "## .NET summary"
           Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value ""
           Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "| Metric | Value |"
           Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "| --- | ---: |"
-          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "| Test results | $passed passed / $total total |"
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "| Test results | $testStatusIcon $passed passed / $total total |"
           Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "| Failed | $failed |"
           Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value "| Skipped | $skipped |"
 
