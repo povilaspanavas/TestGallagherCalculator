@@ -44,20 +44,13 @@ jobs:
           --collect:"XPlat Code Coverage"
 
       - name: Upload .NET test results
-        if: always()
+        if: always() && steps.dotnet-tests.outcome != 'success'
         uses: actions/upload-artifact@v7
         with:
           name: dotnet-test-results
           path: TestResults/**/*.trx
           if-no-files-found: warn
-
-      - name: Upload .NET coverage
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: dotnet-coverage
-          path: TestResults/*/coverage.cobertura.xml
-          if-no-files-found: warn
+          retention-days: 7
 
       - name: Summarize .NET test results
         if: always()
