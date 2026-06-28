@@ -1,4 +1,12 @@
-export type CalculationOperation = 'combinedWith' | 'either'
+export type CalculationOperation = string
+
+export interface CalculationOperationDefinition {
+  id: CalculationOperation
+  label: string
+  description: string
+  formula: string
+  displayOrder: number
+}
 
 export interface CalculationRequest {
   probabilityA: number

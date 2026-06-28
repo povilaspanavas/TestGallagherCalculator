@@ -1,4 +1,5 @@
 import type {
+  CalculationOperationDefinition,
   CalculationRequest,
   CalculationResponse,
   FormErrors,
@@ -55,4 +56,16 @@ export async function calculateProbability(
   }
 
   return (await response.json()) as CalculationResponse
+}
+
+export async function getCalculationOperations(): Promise<
+  CalculationOperationDefinition[]
+> {
+  const response = await fetch('/api/calculations/operations')
+
+  if (!response.ok) {
+    throw new ApiError('The calculation options could not be loaded.')
+  }
+
+  return (await response.json()) as CalculationOperationDefinition[]
 }

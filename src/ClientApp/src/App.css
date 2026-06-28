@@ -285,6 +285,18 @@ main {
   gap: 11px;
 }
 
+.operation-status {
+  color: var(--muted);
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 650;
+  margin-top: 7px;
+}
+
+.operation-status.is-error {
+  color: var(--danger);
+}
+
 .operation-card {
   align-items: center;
   background: #fbfafb;
@@ -326,7 +338,7 @@ main {
   outline-offset: 2px;
 }
 
-.operation-symbol {
+.operation-index {
   align-items: center;
   background: white;
   border: 1px solid var(--line);
@@ -669,7 +681,7 @@ footer {
     padding: 12px;
   }
 
-  .operation-symbol {
+  .operation-index {
     height: 41px;
     width: 41px;
   }

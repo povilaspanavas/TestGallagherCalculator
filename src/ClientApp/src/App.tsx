@@ -1,35 +1,17 @@
-import { useMemo, useState } from 'react'
-import { ApiError, calculateProbability } from './api/calculations'
+import { useEffect, useState } from 'react'
+import {
+  ApiError,
+  calculateProbability,
+  getCalculationOperations,
+} from './api/calculations'
 import type {
   CalculationOperation,
+  CalculationOperationDefinition,
   CalculationResponse,
   FormErrors,
 } from './types'
 import { validateCalculationForm } from './validation'
 import './App.css'
-
-const operations: Record<
-  CalculationOperation,
-  {
-    label: string
-    description: string
-    formula: string
-    symbol: string
-  }
-> = {
-  combinedWith: {
-    label: 'Combined with',
-    description: 'The probability that both events occur.',
-    formula: 'P(A) × P(B)',
-    symbol: '×',
-  },
-  either: {
-    label: 'Either',
-    description: 'The probability that at least one event occurs.',
-    formula: 'P(A) + P(B) − P(A)P(B)',
-    symbol: '∪',
-  },
-}
 
 function formatProbability(value: number) {
   return new Intl.NumberFormat('en-GB', {
@@ -51,40 +33,86 @@ function getFormString(formData: FormData, field: string) {
 
 function isCalculationOperation(
   value: FormDataEntryValue | null,
+  operations: CalculationOperationDefinition[],
 ): value is CalculationOperation {
-  return typeof value === 'string' && value in operations
+  return (
+    typeof value === 'string' &&
+    operations.some((operation) => operation.id === value)
+  )
 }
 
-function getFormOperation(formData: FormData): CalculationOperation | undefined {
+function getFormOperation(
+  formData: FormData,
+  operations: CalculationOperationDefinition[],
+): CalculationOperation | undefined {
   const value = formData.get('operation')
 
-  return isCalculationOperation(value) ? value : undefined
+  return isCalculationOperation(value, operations) ? value : undefined
 }
 
 function App() {
   const [probabilityA, setProbabilityA] = useState('0.5')
   const [probabilityB, setProbabilityB] = useState('0.5')
-  const [operation, setOperation] =
-    useState<CalculationOperation>('combinedWith')
+  const [operations, setOperations] = useState<CalculationOperationDefinition[]>([])
+  const [operation, setOperation] = useState<CalculationOperation>('')
   const [errors, setErrors] = useState<FormErrors>({})
+  const [operationsError, setOperationsError] = useState('')
   const [submitError, setSubmitError] = useState('')
   const [result, setResult] = useState<CalculationResponse | null>(null)
+  const [isLoadingOperations, setIsLoadingOperations] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const selectedOperation = operations[operation]
+  const selectedOperation = operations.find((option) => option.id === operation)
+  const canSubmit = !isLoadingOperations && operations.length > 0
+  const operationPlaceholder = operationsError ? 'Unavailable' : 'Loading'
+  const calculationLine = selectedOperation?.formula ?? operationPlaceholder
 
-  const calculationLine = useMemo(() => {
-    if (!result) {
-      return selectedOperation.formula
+  useEffect(() => {
+    let isCurrent = true
+
+    async function loadOperations() {
+      setIsLoadingOperations(true)
+
+      try {
+        const calculationOperations = await getCalculationOperations()
+        const orderedOperations = [...calculationOperations].sort(
+          (left, right) => left.displayOrder - right.displayOrder,
+        )
+
+        if (!isCurrent) {
+          return
+        }
+
+        setOperations(orderedOperations)
+        setOperation((current) =>
+          orderedOperations.some((option) => option.id === current)
+            ? current
+            : (orderedOperations[0]?.id ?? ''),
+        )
+        setOperationsError('')
+      } catch {
+        if (!isCurrent) {
+          return
+        }
+
+        setOperations([])
+        setOperation('')
+        setOperationsError(
+          'The calculation options could not be loaded. Refresh and try again.',
+        )
+      } finally {
+        if (isCurrent) {
+          setIsLoadingOperations(false)
+        }
+      }
     }
 
-    const a = formatProbability(result.probabilityA)
-    const b = formatProbability(result.probabilityB)
+    void loadOperations()
 
-    return result.operation === 'combinedWith'
-      ? `${a} × ${b}`
-      : `${a} + ${b} − (${a} × ${b})`
-  }, [result, selectedOperation.formula])
+    return () => {
+      isCurrent = false
+    }
+  }, [])
 
   function updateProbability(
     field: 'probabilityA' | 'probabilityB',
@@ -111,7 +139,7 @@ function App() {
   async function submitCalculation(formData: FormData) {
     setSubmitError('')
 
-    const submittedOperation = getFormOperation(formData)
+    const submittedOperation = getFormOperation(formData, operations)
     const validation = validateCalculationForm(
       getFormString(formData, 'probabilityA'),
       getFormString(formData, 'probabilityB'),
@@ -263,26 +291,35 @@ function App() {
                 </span>
               </legend>
 
-              <div className="operation-grid">
-                {(Object.keys(operations) as CalculationOperation[]).map(
-                  (operationKey) => {
-                    const option = operations[operationKey]
-                    const isSelected = operation === operationKey
+              {isLoadingOperations && (
+                <span className="operation-status" role="status">
+                  Loading calculations.
+                </span>
+              )}
+              {operationsError && (
+                <span className="operation-status is-error" role="alert">
+                  {operationsError}
+                </span>
+              )}
+              {!isLoadingOperations && !operationsError && (
+                <div className="operation-grid">
+                  {operations.map((option) => {
+                    const isSelected = operation === option.id
 
                     return (
                       <label
                         className={`operation-card ${isSelected ? 'is-selected' : ''}`}
-                        key={operationKey}
+                        key={option.id}
                       >
                         <input
                           type="radio"
                           name="operation"
-                          value={operationKey}
+                          value={option.id}
                           checked={isSelected}
-                          onChange={() => updateOperation(operationKey)}
+                          onChange={() => updateOperation(option.id)}
                         />
-                        <span className="operation-symbol" aria-hidden="true">
-                          {option.symbol}
+                        <span className="operation-index" aria-hidden="true">
+                          {option.displayOrder.toString().padStart(2, '0')}
                         </span>
                         <span className="operation-copy">
                           <strong>{option.label}</strong>
@@ -294,9 +331,9 @@ function App() {
                         </span>
                       </label>
                     )
-                  },
-                )}
-              </div>
+                  })}
+                </div>
+              )}
               {errors.operation && (
                 <span className="field-error">{errors.operation}</span>
               )}
@@ -308,7 +345,11 @@ function App() {
               </div>
             )}
 
-            <button className="calculate-button" type="submit" disabled={isSubmitting}>
+            <button
+              className="calculate-button"
+              type="submit"
+              disabled={isSubmitting || !canSubmit}
+            >
               <span>{isSubmitting ? 'Calculating…' : 'Calculate probability'}</span>
               <span className="button-arrow" aria-hidden="true">
                 →
@@ -319,7 +360,9 @@ function App() {
           <aside className="result-panel" aria-live="polite">
             <div className="result-topline">
               <span>Result</span>
-              <span className="result-operation">{selectedOperation.label}</span>
+              <span className="result-operation">
+                {selectedOperation?.label ?? operationPlaceholder}
+              </span>
             </div>
 
             <div className={`result-content ${result ? 'has-result' : ''}`}>
