@@ -10,20 +10,13 @@ import type {
   CalculationResponse,
   FormErrors,
 } from './types'
+import { Footer } from './components/Footer'
+import { Header } from './components/Header'
+import { Intro } from './components/Intro'
+import { ProbabilityInput } from './components/ProbabilityInput'
+import { ResultPanel } from './components/ResultPanel'
 import { validateCalculationForm } from './validation'
 import './App.css'
-
-function formatProbability(value: number) {
-  return new Intl.NumberFormat('en-GB', {
-    maximumFractionDigits: 10,
-  }).format(value)
-}
-
-function formatPercentage(value: number) {
-  return new Intl.NumberFormat('en-GB', {
-    maximumFractionDigits: 4,
-  }).format(value * 100)
-}
 
 function getFormString(formData: FormData, field: string) {
   const value = formData.get(field)
@@ -181,28 +174,10 @@ function App() {
 
   return (
     <div className="app-shell">
-      <header className="site-header">
-        <a className="brand" href="/" aria-label="Probability Calculator home">
-          <span className="brand-mark" aria-hidden="true">
-            P
-          </span>
-          <span>Probability Calculator</span>
-        </a>
-        <span className="api-status">
-          <span className="status-dot" aria-hidden="true" />
-          Calculator ready
-        </span>
-      </header>
+      <Header />
 
       <main>
-        <section className="intro" aria-labelledby="page-title">
-          <p className="eyebrow">Investment probability tool</p>
-          <h1 id="page-title">Make uncertainty easier to calculate.</h1>
-          <p className="intro-copy">
-            Enter two probabilities, choose how the events relate, and get an
-            instant result.
-          </p>
-        </section>
+        <Intro />
 
         <section className="calculator-card" aria-label="Probability calculator">
           <form className="calculator-form" action={submitCalculation} noValidate>
@@ -215,71 +190,27 @@ function App() {
             </div>
 
             <div className="probability-grid">
-              <label className="field" htmlFor="probability-a">
-                <span className="field-label">
-                  Probability A <span className="field-hint">P(A)</span>
-                </span>
-                <div
-                  className={`input-wrap ${errors.probabilityA ? 'has-error' : ''}`}
-                >
-                  <span className="input-prefix">A</span>
-                  <input
-                    id="probability-a"
-                    name="probabilityA"
-                    type="number"
-                    min="0"
-                    max="1"
-                    step="any"
-                    inputMode="decimal"
-                    value={probabilityA}
-                    onChange={(event) =>
-                      updateProbability('probabilityA', event.target.value)
-                    }
-                    aria-invalid={Boolean(errors.probabilityA)}
-                    aria-describedby={
-                      errors.probabilityA ? 'probability-a-error' : undefined
-                    }
-                  />
-                </div>
-                {errors.probabilityA && (
-                  <span className="field-error" id="probability-a-error">
-                    {errors.probabilityA}
-                  </span>
-                )}
-              </label>
+              <ProbabilityInput
+                field="probabilityA"
+                id="probability-a"
+                label="Probability A"
+                hint="P(A)"
+                prefix="A"
+                value={probabilityA}
+                error={errors.probabilityA}
+                onChange={updateProbability}
+              />
 
-              <label className="field" htmlFor="probability-b">
-                <span className="field-label">
-                  Probability B <span className="field-hint">P(B)</span>
-                </span>
-                <div
-                  className={`input-wrap ${errors.probabilityB ? 'has-error' : ''}`}
-                >
-                  <span className="input-prefix">B</span>
-                  <input
-                    id="probability-b"
-                    name="probabilityB"
-                    type="number"
-                    min="0"
-                    max="1"
-                    step="any"
-                    inputMode="decimal"
-                    value={probabilityB}
-                    onChange={(event) =>
-                      updateProbability('probabilityB', event.target.value)
-                    }
-                    aria-invalid={Boolean(errors.probabilityB)}
-                    aria-describedby={
-                      errors.probabilityB ? 'probability-b-error' : undefined
-                    }
-                  />
-                </div>
-                {errors.probabilityB && (
-                  <span className="field-error" id="probability-b-error">
-                    {errors.probabilityB}
-                  </span>
-                )}
-              </label>
+              <ProbabilityInput
+                field="probabilityB"
+                id="probability-b"
+                label="Probability B"
+                hint="P(B)"
+                prefix="B"
+                value={probabilityB}
+                error={errors.probabilityB}
+                onChange={updateProbability}
+              />
             </div>
 
             <fieldset className="operation-fieldset">
@@ -357,54 +288,16 @@ function App() {
             </button>
           </form>
 
-          <aside className="result-panel" aria-live="polite">
-            <div className="result-topline">
-              <span>Result</span>
-              <span className="result-operation">
-                {selectedOperation?.label ?? operationPlaceholder}
-              </span>
-            </div>
-
-            <div className={`result-content ${result ? 'has-result' : ''}`}>
-              {result ? (
-                <>
-                  <p className="result-label">Calculated probability</p>
-                  <p className="result-value" data-testid="result-value">
-                    {formatProbability(result.result)}
-                  </p>
-                  <p className="result-percentage">
-                    {formatPercentage(result.result)}%
-                  </p>
-                </>
-              ) : (
-                <>
-                  <div className="empty-result-icon" aria-hidden="true">
-                    <span>?</span>
-                  </div>
-                  <p className="empty-result-title">Ready when you are</p>
-                  <p className="empty-result-copy">
-                    Your calculated probability will appear here.
-                  </p>
-                </>
-              )}
-            </div>
-
-            <div className="formula-card">
-              <span>Formula</span>
-              <strong>{calculationLine}</strong>
-            </div>
-
-            <p className="result-note">
-              A probability of 0 means impossible; 1 means certain.
-            </p>
-          </aside>
+          <ResultPanel
+            selectedOperation={selectedOperation}
+            operationPlaceholder={operationPlaceholder}
+            calculationLine={calculationLine}
+            result={result}
+          />
         </section>
       </main>
 
-      <footer>
-        <span>Built for clear, quick probability calculations.</span>
-        <span>Values accepted from 0 to 1.</span>
-      </footer>
+      <Footer />
     </div>
   )
 }
