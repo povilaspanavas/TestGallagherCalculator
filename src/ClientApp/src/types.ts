@@ -14,7 +14,10 @@ export interface CalculationRequest {
   operation: CalculationOperation
 }
 
-export interface CalculationResponse extends CalculationRequest {
+export interface CalculationResponse {
+  probabilityA: number
+  probabilityB: number
+  operation: CalculationOperation
   result: number
 }
 
