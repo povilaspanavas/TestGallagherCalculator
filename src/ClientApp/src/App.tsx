@@ -1,9 +1,5 @@
-import { useEffect, useState } from 'react'
-import {
-  ApiError,
-  calculateProbability,
-  getCalculationOperations,
-} from './api/calculations'
+import { useState } from 'react'
+import { ApiError, calculateProbability } from './api/calculations'
 import type {
   CalculationOperation,
   CalculationOperationDefinition,
@@ -15,7 +11,8 @@ import { Header } from './components/Header'
 import { Intro } from './components/Intro'
 import { ProbabilityInput } from './components/ProbabilityInput'
 import { ResultPanel } from './components/ResultPanel'
-import { validateCalculationForm } from './validation'
+import { useCalculationOperations } from './hooks/useCalculationOperations'
+import { validateCalculationForm } from './validation/calculationFormValidation'
 import './App.css'
 
 function getFormString(formData: FormData, field: string) {
@@ -46,66 +43,21 @@ function getFormOperation(
 function App() {
   const [probabilityA, setProbabilityA] = useState('0.5')
   const [probabilityB, setProbabilityB] = useState('0.5')
-  const [operations, setOperations] = useState<CalculationOperationDefinition[]>([])
-  const [operation, setOperation] = useState<CalculationOperation>('')
   const [errors, setErrors] = useState<FormErrors>({})
-  const [operationsError, setOperationsError] = useState('')
   const [submitError, setSubmitError] = useState('')
   const [result, setResult] = useState<CalculationResponse | null>(null)
-  const [isLoadingOperations, setIsLoadingOperations] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
-
-  const selectedOperation = operations.find((option) => option.id === operation)
+  const {
+    isLoadingOperations,
+    operation,
+    operations,
+    operationsError,
+    selectedOperation,
+    setOperation,
+  } = useCalculationOperations()
   const canSubmit = !isLoadingOperations && operations.length > 0
   const operationPlaceholder = operationsError ? 'Unavailable' : 'Loading'
   const calculationLine = selectedOperation?.formula ?? operationPlaceholder
-
-  useEffect(() => {
-    let isCurrent = true
-
-    async function loadOperations() {
-      setIsLoadingOperations(true)
-
-      try {
-        const calculationOperations = await getCalculationOperations()
-        const orderedOperations = [...calculationOperations].sort(
-          (left, right) => left.displayOrder - right.displayOrder,
-        )
-
-        if (!isCurrent) {
-          return
-        }
-
-        setOperations(orderedOperations)
-        setOperation((current) =>
-          orderedOperations.some((option) => option.id === current)
-            ? current
-            : (orderedOperations[0]?.id ?? ''),
-        )
-        setOperationsError('')
-      } catch {
-        if (!isCurrent) {
-          return
-        }
-
-        setOperations([])
-        setOperation('')
-        setOperationsError(
-          'The calculation options could not be loaded. Refresh and try again.',
-        )
-      } finally {
-        if (isCurrent) {
-          setIsLoadingOperations(false)
-        }
-      }
-    }
-
-    void loadOperations()
-
-    return () => {
-      isCurrent = false
-    }
-  }, [])
 
   function updateProbability(
     field: 'probabilityA' | 'probabilityB',
