@@ -92,11 +92,13 @@ Example response:
 }
 ```
 
-The other accepted operation is `"either"`. Invalid or missing values return an HTTP 400 validation problem response.
+The other accepted operation is `"either"`. Invalid or missing values return an HTTP 400 validation problem response. For a production deployment, the API would also use centralized exception handling middleware to convert unexpected failures into standard problem details responses without leaking internal exception details.
 
 `GET /api/calculations/operations`
 
-Returns the supported calculation operations used by the ClientApp.
+Returns the supported calculation operations used by the ClientApp. The endpoint
+uses output caching because these operation definitions are read frequently by
+clients but change rarely.
 
 Example response:
 
@@ -173,6 +175,12 @@ Validation is duplicated intentionally: the React app gives immediate feedback
 to the user, while the API remains the source of truth for request validation.
 Authentication, authorization, and database persistence are intentionally out of
 scope.
+
+The operations endpoint currently uses local output caching, which is enough for
+this small service because the data is static and cheap to rebuild. In a larger
+multi-instance deployment, similar read-heavy reference data could use a
+distributed cache such as Redis so all API instances share the same cached data
+and avoid repeatedly querying the backing store.
 
 ## Cloud and DevOps
 
