@@ -9,19 +9,27 @@ The calculator supports:
 -   Probabilities from `0` to `1`, inclusive
 -   Client-side and server-side validation
 
-## Project structure
+## Implemented scope
 
-```text
-src/
-  Api/                                .NET Minimal API
-  ClientApp/                          React and TypeScript application
-    src/                              React source and colocated Vitest tests
-  ProbabilityCalculator.AppHost/      .NET Aspire host for API and ClientApp
-  ProbabilityCalculator.ServiceDefaults/ Common Aspire service configuration
-tests/
-  ProbabilityCalculator.Api.Tests/    Backend unit tests
-  ProbabilityCalculator.Api.IntegrationTests/ Backend integration tests
-```
+Implemented:
+
+-   C# backend API for the calculations
+-   React/TypeScript frontend
+-   CombinedWith and Either operations
+-   client-side and server-side validation for probabilities from `0` to `1`
+-   backend unit and integration tests
+-   frontend component and validation tests
+-   structured calculation logging and local observability through Aspire
+-   CI workflow for build, lint, test, and .NET coverage collection
+
+Not included as runnable assets:
+
+-   Dockerfiles and deployment manifests
+-   Terraform infrastructure modules
+-   production alert rules or dashboards
+
+Those items are discussed later as the intended production path rather than
+included as runnable assets in this small exercise repository.
 
 ## Run locally
 
@@ -45,6 +53,20 @@ Local links:
 -   Aspire dashboard: [https://localhost:17137](https://localhost:17137)
 -   ClientApp: [http://localhost:5173](http://localhost:5173)
 -   API reference (Scalar/OpenAPI): [https://localhost:5001/scalar](https://localhost:5001/scalar)
+
+## Project structure
+
+```text
+src/
+  Api/                                .NET Minimal API
+  ClientApp/                          React and TypeScript application
+    src/                              React source and colocated Vitest tests
+  ProbabilityCalculator.AppHost/      .NET Aspire host for API and ClientApp
+  ProbabilityCalculator.ServiceDefaults/ Common Aspire service configuration
+tests/
+  ProbabilityCalculator.Api.Tests/    Backend unit tests
+  ProbabilityCalculator.Api.IntegrationTests/ Backend integration tests
+```
 
 ## Tests and builds
 
@@ -220,7 +242,8 @@ that would normally include:
 -   a workspace-based Azure Application Insights resource connected to a Log
     Analytics workspace
 -   managed identities or federated workload identity for CI/CD deployments
--   Key Vault for secrets such as connection strings, if secrets are required
+-   runtime secret injection for connection strings and other sensitive
+    configuration, using the deployment platform or a managed secret store
 
 In production, the deployment would use multiple replicas, platform health
 checks, autoscaling rules, centralized logs and traces, alerts for error rate
@@ -228,25 +251,3 @@ and latency, and zero-downtime rollout strategies such as blue/green or rolling
 deployments. For a 99.99% availability target, the design would also consider
 zone-redundant hosting, multi-region failover where required, and static
 frontend delivery through a CDN or edge-capable hosting service.
-
-## Exercise coverage
-
-Implemented:
-
--   C# backend API for the calculations
--   React/TypeScript frontend
--   CombinedWith and Either operations
--   client-side and server-side validation for probabilities from `0` to `1`
--   backend unit and integration tests
--   frontend component and validation tests
--   structured calculation logging and local observability through Aspire
--   CI workflow for build, lint, test, and .NET coverage collection
-
-Not included as runnable assets:
-
--   Dockerfiles and deployment manifests
--   Terraform infrastructure modules
--   production alert rules or dashboards
-
-Those items are described above as the intended production path rather than
-included in this small exercise repository.
