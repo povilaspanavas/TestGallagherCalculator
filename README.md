@@ -28,7 +28,7 @@ tests/
 Requirements:
 
 -   .NET 10 SDK or newer
--   Node.js and npm
+-   Node.js `^20.19.0 || >=22.12.0`, with npm bundled by Node.js
 
 Start the application through the .NET Aspire AppHost:
 
@@ -36,7 +36,7 @@ Start the application through the .NET Aspire AppHost:
 dotnet run --project src/ProbabilityCalculator.AppHost --launch-profile https
 ```
 
-The AppHost starts both the Minimal API and the ClientApp. Open the dashboard
+The AppHost starts both the Minimal API and the ClientApp (React frontend). Open the dashboard
 URL printed by Aspire to inspect the running resources. The `https` launch
 profile pins the local ports used below.
 
