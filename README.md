@@ -154,9 +154,10 @@ telemetry can be exported to the provider used by the hosting environment:
 -   set `OTEL_EXPORTER_OTLP_ENDPOINT` to send telemetry to any OTLP-compatible
     collector or observability platform
 
-For an Azure deployment, Application Insights can be connected to a Log
-Analytics workspace so operational logs, traces, metrics, and calculation
-events can be queried through Azure Monitor Logs / Log Analytics.
+For an Azure deployment, a workspace-based Application Insights resource would
+provide the application monitoring view for requests, failures, dependencies,
+traces, metrics, and performance. The connected Log Analytics workspace would
+retain the telemetry and support deeper querying through Azure Monitor Logs.
 
 ## Architecture notes
 
@@ -167,8 +168,8 @@ calculation should not require hard-coding frontend options.
 
 Validation is duplicated intentionally: the React app gives immediate feedback
 to the user, while the API remains the source of truth for request validation.
-No authentication, authorization, or database has been added because the
-exercise explicitly excludes them.
+Authentication, authorization, and database persistence are intentionally out of
+scope.
 
 ## Cloud and DevOps
 
@@ -192,8 +193,8 @@ that would normally include:
 -   Azure Container Registry
 -   Azure Container Apps Environment and Container Apps, or an Azure Kubernetes
     Service cluster
--   Azure Monitor Application Insights
--   a Log Analytics workspace for Azure Monitor Logs
+-   a workspace-based Azure Application Insights resource connected to a Log
+    Analytics workspace
 -   managed identities or federated workload identity for CI/CD deployments
 -   Key Vault for secrets such as connection strings, if secrets are required
 
@@ -212,8 +213,8 @@ Implemented:
 -   client-side and server-side validation for probabilities from `0` to `1`
 -   backend unit and integration tests
 -   frontend component and validation tests
--   structured calculation logging with OpenTelemetry export hooks
--   CI workflow for build, lint, and test
+-   structured calculation logging and local observability through Aspire
+-   CI workflow for build, lint, test, and .NET coverage collection
 
 Not included as runnable assets:
 
