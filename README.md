@@ -226,7 +226,9 @@ that would normally include:
 In production, the deployment would use multiple replicas, platform health
 checks, autoscaling rules, centralized logs and traces, alerts for error rate
 and latency, and zero-downtime rollout strategies such as blue/green or rolling
-deployments.
+deployments. For a 99.99% availability target, the design would also consider
+zone-redundant hosting, multi-region failover where required, and static
+frontend delivery through a CDN or edge-capable hosting service.
 
 ## Exercise coverage
 
