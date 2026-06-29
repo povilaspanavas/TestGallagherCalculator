@@ -1,6 +1,6 @@
 # Probability Calculator
 
-A small probability calculator built with a .NET 10 Minimal API and a React/TypeScript frontend.
+A small probability calculator built with a .NET 10 Minimal API, a React/TypeScript frontend, and .NET Aspire for local orchestration and shared service defaults.
 
 The calculator supports:
 
@@ -12,11 +12,15 @@ The calculator supports:
 ## Project structure
 
 ```text
-src/Api/                              .NET Minimal API
-src/ClientApp/                        React and TypeScript application
-src/ClientApp/src/                    React source and colocated Vitest tests
-tests/ProbabilityCalculator.Api.Tests/ Backend unit tests
-tests/ProbabilityCalculator.Api.IntegrationTests/ Backend integration tests
+src/
+  Api/                                .NET Minimal API
+  ClientApp/                          React and TypeScript application
+    src/                              React source and colocated Vitest tests
+  ProbabilityCalculator.AppHost/      .NET Aspire host for API and ClientApp
+  ProbabilityCalculator.ServiceDefaults/ Shared Aspire service configuration
+tests/
+  ProbabilityCalculator.Api.Tests/    Backend unit tests
+  ProbabilityCalculator.Api.IntegrationTests/ Backend integration tests
 ```
 
 ## Run locally
@@ -26,23 +30,21 @@ Requirements:
 -   .NET 10 SDK or newer
 -   Node.js and npm
 
-Start the API:
+Start the application through the .NET Aspire AppHost:
 
 ```powershell
-dotnet run --project src/Api
+dotnet run --project src/ProbabilityCalculator.AppHost --launch-profile https
 ```
 
-The API listens on `http://localhost:5000`.
+The AppHost starts both the Minimal API and the ClientApp. Open the dashboard
+URL printed by Aspire to inspect the running resources. The `https` launch
+profile pins the local ports used below.
 
-In a second terminal, start the frontend:
+Local links:
 
-```powershell
-cd src\ClientApp
-npm install
-npm run dev
-```
-
-Open the URL printed by Vite, normally `http://localhost:5173`. The Vite development server proxies `/api` requests to the Minimal API.
+-   Aspire dashboard: `https://localhost:17137`
+-   ClientApp: `http://localhost:5173`
+-   API reference: `https://localhost:5001/scalar`
 
 ## Tests and builds
 
@@ -63,21 +65,6 @@ The repository also includes a GitHub Actions workflow in
 -   installs, lints, tests, and builds the React/TypeScript client app
 
 ## API
-
-`GET /health`
-
-Readiness endpoint intended for load balancers, deployment checks, and uptime
-monitoring.
-
-`GET /alive`
-
-Liveness endpoint intended for process-level checks.
-
-These endpoints are available in all environments to support production
-monitoring and orchestration. In a real deployment, they should avoid exposing
-detailed dependency or infrastructure information and should normally be
-restricted through platform or network controls, for example private Kubernetes
-probes, internal load balancer access, or API gateway/reverse-proxy rules.
 
 `POST /api/calculations`
 
@@ -104,6 +91,47 @@ Example response:
 
 The other accepted operation is `"either"`. Invalid or missing values return an HTTP 400 validation problem response.
 
+`GET /api/calculations/operations`
+
+Returns the supported calculation operations used by the ClientApp.
+
+Example response:
+
+```json
+[
+  {
+    "id": "combinedWith",
+    "label": "Combined with",
+    "description": "The probability that both events occur.",
+    "formula": "P(A) × P(B)",
+    "displayOrder": 1
+  },
+  {
+    "id": "either",
+    "label": "Either",
+    "description": "The probability that at least one event occurs.",
+    "formula": "P(A) + P(B) − P(A)P(B)",
+    "displayOrder": 2
+  }
+]
+```
+
+`GET /health`
+
+Readiness endpoint intended for load balancers, deployment checks, and uptime
+monitoring.
+
+`GET /alive`
+
+Liveness endpoint intended for process-level checks.
+
+These endpoints are available in all environments to support production
+monitoring and orchestration. In a real deployment, they should avoid exposing
+detailed dependency or infrastructure information and should normally be
+restricted through hosting or network controls, for example private Kubernetes
+probes, internal load balancer access, Azure API Management policies, or Azure
+Container Apps internal ingress.
+
 ## Logging and observability
 
 Each successful calculation is written as a structured application log with:
@@ -113,10 +141,13 @@ Each successful calculation is written as a structured application log with:
 -   both input probabilities
 -   the calculated result
 
+In local development, calculation logs can be viewed directly at
+`https://localhost:17137/structuredlogs`. The Aspire dashboard also shows the
+running resources, traces, and metrics.
+
 The API uses the shared `ProbabilityCalculator.ServiceDefaults` project to add
-OpenTelemetry logging, metrics, and tracing. In local development these logs are
-available through the normal .NET logging pipeline. In a deployed environment,
-telemetry can be exported to the provider used by the hosting platform:
+OpenTelemetry logging, metrics, and tracing. In a deployed environment,
+telemetry can be exported to the provider used by the hosting environment:
 
 -   set `APPLICATIONINSIGHTS_CONNECTION_STRING` to send telemetry to Azure
     Monitor Application Insights
