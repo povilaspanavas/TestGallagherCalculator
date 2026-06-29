@@ -1,6 +1,6 @@
 # Probability Calculator
 
-A small probability calculator built with a .NET 10 Minimal API, a React/TypeScript frontend, and .NET Aspire for local orchestration and shared service defaults.
+A small probability calculator built with a .NET 10 Minimal API, a React/TypeScript frontend, and .NET Aspire for local orchestration.
 
 The calculator supports:
 
@@ -17,7 +17,7 @@ src/
   ClientApp/                          React and TypeScript application
     src/                              React source and colocated Vitest tests
   ProbabilityCalculator.AppHost/      .NET Aspire host for API and ClientApp
-  ProbabilityCalculator.ServiceDefaults/ Shared Aspire service configuration
+  ProbabilityCalculator.ServiceDefaults/ Common Aspire service configuration
 tests/
   ProbabilityCalculator.Api.Tests/    Backend unit tests
   ProbabilityCalculator.Api.IntegrationTests/ Backend integration tests
@@ -150,7 +150,7 @@ When running locally through AppHost, calculation logs can be viewed directly at
 `https://localhost:17137/structuredlogs`. The Aspire dashboard also shows the
 running resources, traces, and metrics.
 
-The API uses the shared `ProbabilityCalculator.ServiceDefaults` project to add
+The API uses the `ProbabilityCalculator.ServiceDefaults` project to add
 OpenTelemetry logging, metrics, and tracing. In a deployed environment,
 telemetry can be exported to the provider used by the hosting environment:
 
@@ -163,6 +163,11 @@ For an Azure deployment, a workspace-based Application Insights resource would
 provide the application monitoring view for requests, failures, dependencies,
 traces, metrics, and performance. The connected Log Analytics workspace would
 retain the telemetry and support deeper querying through Azure Monitor Logs.
+
+The React frontend is not instrumented in this exercise. In production, it
+would be worth tracking browser errors, page performance, and API request
+correlation, ideally using tooling that fits the same OpenTelemetry/Azure
+Monitor observability pipeline as the API.
 
 ## Architecture notes
 
@@ -181,6 +186,15 @@ this small service because the data is static and cheap to rebuild. In a larger
 multi-instance deployment, similar read-heavy reference data could use a
 distributed cache such as Redis so all API instances share the same cached data
 and avoid repeatedly querying the backing store.
+
+## Security considerations
+
+Authentication and authorization are out of scope for this exercise. For a
+production deployment, the API would enforce HTTPS, restrict CORS to trusted
+frontend origins, avoid leaking exception details, review calculation logs for
+sensitive data, and restrict development tooling such as public OpenAPI/Scalar
+access. Health endpoints should expose only minimal information and normally be
+protected through hosting or network controls.
 
 ## Cloud and DevOps
 
