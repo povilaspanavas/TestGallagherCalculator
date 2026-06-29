@@ -51,10 +51,9 @@ Local links:
 ```powershell
 dotnet test
 
-cd src\ClientApp
-npm test
-npm run lint
-npm run build
+npm --prefix src\ClientApp test
+npm --prefix src\ClientApp run lint
+npm --prefix src\ClientApp run build
 ```
 
 The repository also includes a GitHub Actions workflow in
