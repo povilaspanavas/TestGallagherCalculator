@@ -44,7 +44,7 @@ Local links:
 
 -   Aspire dashboard: `https://localhost:17137`
 -   ClientApp: `http://localhost:5173`
--   API reference: `https://localhost:5001/scalar`
+-   API reference (Scalar/OpenAPI): `https://localhost:5001/scalar`
 
 ## Tests and builds
 
@@ -65,6 +65,9 @@ The repository also includes a GitHub Actions workflow in
 -   installs, lints, tests, and builds the React/TypeScript client app
 
 ## API
+
+The API exposes OpenAPI documentation through Scalar at
+`https://localhost:5001/scalar` when running in the `Development` environment.
 
 `POST /api/calculations`
 
@@ -141,7 +144,7 @@ Each successful calculation is written as a structured application log with:
 -   both input probabilities
 -   the calculated result
 
-In local development, calculation logs can be viewed directly at
+When running locally through AppHost, calculation logs can be viewed directly at
 `https://localhost:17137/structuredlogs`. The Aspire dashboard also shows the
 running resources, traces, and metrics.
 
