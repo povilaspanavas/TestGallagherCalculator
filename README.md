@@ -42,9 +42,9 @@ profile pins the local ports used below.
 
 Local links:
 
--   Aspire dashboard: `https://localhost:17137`
--   ClientApp: `http://localhost:5173`
--   API reference (Scalar/OpenAPI): `https://localhost:5001/scalar`
+-   Aspire dashboard: [https://localhost:17137](https://localhost:17137)
+-   ClientApp: [http://localhost:5173](http://localhost:5173)
+-   API reference (Scalar/OpenAPI): [https://localhost:5001/scalar](https://localhost:5001/scalar)
 
 ## Tests and builds
 
